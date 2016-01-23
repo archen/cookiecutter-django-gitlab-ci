@@ -1,0 +1,97 @@
+stages:
+  - test
+  - deliver
+  - cleanup
+  - deploy
+
+unittest-py2:
+  script:
+   - echo $CI_BUILD_REF
+   - echo 'deb http://downloads.sourceforge.net/project/ubuntuzilla/mozilla/apt all main' > /etc/apt/sources.list.d/ubuntuzilla.list
+   - apt-key adv --recv-keys --keyserver keyserver.ubuntu.com C1289A29
+   - apt-get update
+   - apt-get install -y gettext xvfb firefox libxcomposite1 libasound2 libdbus-glib-1-2 libgtk2.0-0
+   - pip install -r requirements.txt
+   - pip install coverage
+   - pip install hitch
+   - cd tests
+   - hitch init
+   - hitch test . --extra '{\"xvfb\":true, \"pause_on_failure\":false}'
+   - coverage html
+   - coverage report
+  tags:
+   - docker, python2.7
+  artifacts:
+    paths:
+     - htmlcov/
+  stage: test
+
+unittest-py3:
+  script:
+   - echo $CI_BUILD_REF
+   - echo 'deb http://downloads.sourceforge.net/project/ubuntuzilla/mozilla/apt all main' > /etc/apt/sources.list.d/ubuntuzilla.list
+   - apt-key adv --recv-keys --keyserver keyserver.ubuntu.com C1289A29
+   - apt-get update
+   - apt-get install -y gettext xvfb firefox libxcomposite1 libasound2 libdbus-glib-1-2 libgtk2.0-0
+   - Xvfb :99 -ac -extension RANDR &
+   - export DISPLAY=:99
+   - pip install -r requirements.txt
+   - pip install coverage
+   - pip install hitch
+   - cd tests
+   - hitch init
+   - hitch test . --extra '{\"xvfb\":true, \"pause_on_failure\":false}'
+   - coverage html
+   - coverage report
+  tags:
+   - docker, python3.5
+  artifacts:
+    paths:
+     - htmlcov/
+  stage: test
+
+static-py2:
+  script:
+   - echo $CI_BUILD_REF
+   - echo $CI_BUILD_ID
+   - echo $PROJECT_NAME
+   - pip install -r requirements.txt
+   - pip install prospector
+   - export PYTHONPATH=$PYTHONPATH:/pylint-custom/custom_check
+   - prospector --strictness verylow --output-format json
+  tags:
+   - docker, python2.7
+  stage: test
+  allow_failure: true
+
+static-py3:
+  script:
+   - echo $CI_BUILD_REF
+   - echo $CI_BUILD_ID
+   - echo $PROJECT_NAME
+   - pip install -r requirements.txt
+   - pip install prospector
+   - export PYTHONPATH=$PYTHONPATH:/pylint-custom/custom_check
+   - prospector --strictness verylow --output-format json
+  tags:
+   - docker, python3.5
+  stage: test
+  allow_failure: true
+
+build-docker:
+  image: gitlab/dind:latest
+  script:
+   - docker build -t django-nv/$CI_BUILD_REF .
+   - docker run -d -p 8000 --name $CI_BUILD_REF django-nv/$CI_BUILD_REF
+  stage: delivery
+  tags:
+   - dind
+
+remove-containers:
+  image: gitlab/dind:latest
+  script:
+    - docker kill $CI_BUILD_REF
+    - docker rm $CI_BUILD_REF
+  stage: cleanup_test
+  tags:
+   - dind
