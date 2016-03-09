@@ -1,16 +1,5 @@
-cookiecutter-django
+cookiecutter-django-gitlab-ci
 =======================
-
-.. image:: https://requires.io/github/pydanny/cookiecutter-django/requirements.svg?branch=master
-     :target: https://requires.io/github/pydanny/cookiecutter-django/requirements/?branch=master
-     :alt: Requirements Status
-
-.. image:: https://travis-ci.org/pydanny/cookiecutter-django.svg?branch=master
-     :target: https://travis-ci.org/pydanny/cookiecutter-django?branch=master
-     :alt: Build Status
-
-.. image:: https://badges.gitter.im/Join Chat.svg
-   :target: https://gitter.im/pydanny/cookiecutter-django?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge
 
 
 A Cookiecutter_ template for Django.
@@ -86,7 +75,7 @@ First, get cookiecutter. Trust me, it's awesome::
 
 Now run it against this repo::
 
-    $ cookiecutter https://github.com/pydanny/cookiecutter-django.git
+    $ cookiecutter https://github.com/archen/cookiecutter-django-gitlab-ci.git
 
 You'll be prompted for some questions, answer them, then it will create a Django project for you.
 
